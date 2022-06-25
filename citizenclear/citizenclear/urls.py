@@ -1,11 +1,10 @@
 from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt import views as jwt_views
-from accounts.views import UserViewSet, GroupViewSet, RegisterUserApiView
+from accounts.views import UserViewSet, RegisterUserApiView
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
-router.register(r'groups', GroupViewSet)
 
 
 urlpatterns = [
