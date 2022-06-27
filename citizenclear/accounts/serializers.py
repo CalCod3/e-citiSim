@@ -32,4 +32,4 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'id_number', ]
+        fields = ['first_name', 'last_name', 'email', 'id_number', 'password', ]

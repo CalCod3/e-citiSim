@@ -1,4 +1,4 @@
-from tkinter import CASCADE
+from django.urls import reverse
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 class UserManager(BaseUserManager):
     
 
-    def create_user(self, first_name:str, last_name:str, email:str, id_number:int, password:None, is_staff:False, is_superuser:False)->"User":
+    def create_user(self, first_name:str, last_name:str, email:str, id_number:int, password:None)->"User":
         if not email:
             raise ValueError("Please provide a valid e-mail address")
         if not first_name:
@@ -23,9 +23,7 @@ class UserManager(BaseUserManager):
         user.id_number = id_number
         user.set_password(password)
         user.is_active = True
-        user.is_superuser = is_superuser
-        user.is_staff = is_staff
-        user.save()
+        user.save(using = self._db)
         return user
 
 
@@ -47,11 +45,7 @@ class UserManager(BaseUserManager):
         user.is_active = True
         user.is_superuser = True
         user.is_staff = True
-        user.save()
-
-        
-
-
+        user.save(using = self._db)
         return user
 
 class CustomUser(AbstractBaseUser):
@@ -61,11 +55,27 @@ class CustomUser(AbstractBaseUser):
     id_number = models.IntegerField(validators=[MinValueValidator(100000), MaxValueValidator(10000000000)])
     password = models.CharField(max_length=255)
     username = None
+    is_active = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name", "id_number"]
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, accounts):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
+
+    def get_absolute_url(self):
+        return reverse("User-detail", kwargs={"pk": self.pk})
 
 class Appointment(models.Model):
     user = models.OneToOneField(
