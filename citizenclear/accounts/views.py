@@ -10,6 +10,7 @@ from rest_framework import status
 from .utils import get_tokens_for_user
 from .models import CustomUser, Appointment
 from .serializers import AppointmentSerializer, RegisterSerializer
+#from rest_framework.decorators import authentication_classes
 
 #class UserViewSet(viewsets.ModelViewSet):
 #    queryset = CustomUser.objects.all()
@@ -32,7 +33,7 @@ class AppointmentApiView(CreateAPIView):
 class AdminViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
     serializer_class= AppointmentSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
 
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
@@ -49,6 +50,7 @@ class RegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
+#    @authentication_classes([JSONWebTokenAuthentication])
     def post(self, request):
         if 'email' not in request.data or 'password' not in request.data:
             return Response({'msg': 'Credentials missing'}, status=status.HTTP_400_BAD_REQUEST)
@@ -59,7 +61,8 @@ class LoginView(APIView):
             login(request, user)
             auth_data = get_tokens_for_user(request.user)
             return Response({'msg': 'Login Success', **auth_data}, status=status.HTTP_200_OK)
-        return Response({'msg': 'You have entered Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'msg': 'You have entered Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
       
 class LogoutView(APIView):

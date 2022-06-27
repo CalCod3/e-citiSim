@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -48,7 +48,7 @@ class UserManager(BaseUserManager):
         user.save(using = self._db)
         return user
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=125)
     last_name = models.CharField(max_length=125)
@@ -69,10 +69,6 @@ class CustomUser(AbstractBaseUser):
 
     def has_module_perms(self, accounts):
         return True
-
-    @property
-    def is_staff(self):
-        return self.is_admin
 
     def get_absolute_url(self):
         return reverse("User-detail", kwargs={"pk": self.pk})
